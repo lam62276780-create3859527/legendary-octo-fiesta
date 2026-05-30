@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>City Tech Alchemy | 城市科技炼金室</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    body{background:#f7f9fc;color:#1a1a2e;padding:20px;line-height:1.6}
+    .container{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);padding:24px}
+    h1{text-align:center;color:#1a1a2e;margin-bottom:8px}
+    .subtitle{text-align:center;color:#64748b;margin-bottom:24px}
+    .section{margin-bottom:28px}
+    .section h3{color:#0f3460;margin-bottom:12px;border-left:4px solid #4361ee;padding-left:10px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+    .card{padding:14px 10px;border:1px solid #e2e8f0;border-radius:12px;text-align:center;cursor:pointer;transition:.2s;background:#fbfdff}
+    .card:hover{border-color:#4361ee;background:#eff6ff}
+    .card.active{background:#4361ee;color:#fff;border-color:#4361ee}
+    .btn{display:block;width:100%;padding:16px;border:none;border-radius:12px;background:#4361ee;color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin:20px 0}
+    .btn:disabled{background:#cbd5e1;cursor:not-allowed}
+    .result{padding:20px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0}
+    .score{font-size:20px;font-weight:700;color:#4361ee;margin-bottom:10px}
+    .dim{display:flex;justify-content:space-between;margin:6px 0;color:#334155}
+    .tips{margin-top:12px;font-size:14px;color:#64748b}
+    .best{margin-top:20px;padding:14px;background:#f0f9ff;border-radius:12px;border:1px solid #7dd3fc}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>City Tech Alchemy</h1>
+    <p class="subtitle">城市科技炼金室 · 组合场景与科技，创造高价值方案</p>
+
+    <div class="section">
+      <h3>Step 1｜选择应用场景</h3>
+      <div id="sceneGrid" class="grid"></div>
+    </div>
+
+    <div class="section">
+      <h3>Step 2｜选择 2–3 张科技卡牌</h3>
+      <div id="techGrid" class="grid"></div>
+    </div>
+
+    <button id="calcBtn" disabled>🔮 开始炼金评分</button>
+
+    <div id="result" class="result" style="display:none">
+      <div class="score">总评分：<span id="total">0</span></div>
+      <div class="dim">创新度：<span id="inn">0</span></div>
+      <div class="dim">实用度：<span id="pra">0</span></div>
+      <div class="dim">环保价值：<span id="eco">0</span></div>
+      <div class="dim">发展潜力：<span id="pot">0</span></div>
+      <div class="tips" id="tips"></div>
+    </div>
+
+    <div class="best">
+      <strong>历史最佳方案</strong><br>
+      <span id="bestText">暂无炼金记录</span>
+    </div>
+  </div>
+
+  <script>
+    // 配置数据
+    const scenes = [
+      "Smart Logistics Hub","Urban Farm","Smart Factory","Medical Center","Eco Monitor","Tech Incubator"
+    ]
+    const techs = [
+      "Satellite Comms","Remote Sensing","Drone","Sensor","IoT","Precision Mfg","3D Printing","Robot","New Material","Smart Agro","Urban Agro","Eco Management","Space Law"
+    ]
+    let selScene=null,selTech=[]
+    const best={score:0,text:""}
+
+    // 渲染场景
+    const sg=document.getElementById("sceneGrid")
+    scenes.forEach(s=>{
+      const div=document.createElement("div")
+      div.className="card"
+      div.textContent=s
+      div.onclick=()=>{
+        document.querySelectorAll("#sceneGrid .card").forEach(c=>c.classList.remove("active"))
+        div.classList.add("active")
+        selScene=s
+        checkBtn()
+      }
+      sg.appendChild(div)
+    })
+
+    // 渲染科技
+    const tg=document.getElementById("techGrid")
+    techs.forEach(t=>{
+      const div=document.createElement("div")
+      div.className="card"
+      div.textContent=t
+      div.onclick=()=>{
+        if(div.classList.contains("active")){
+          div.classList.remove("active")
+          selTech=selTech.filter(x=>x!==t)
+        }else{
+          if(selTech.length>=3)return
+          div.classList.add("active")
+          selTech.push(t)
+        }
+        checkBtn()
+      }
+      tg.appendChild(div)
+    })
+
+    function checkBtn(){
+      document.getElementById("calcBtn").disabled=!selScene||selTech.length<2
+    }
+
+    // 评分逻辑
+    document.getElementById("calcBtn").onclick=()=>{
+      const base=Math.floor(Math.random()*20)+60
+      const bonus=selTech.length===3?5:0
+      const inn=Math.min(100,base+Math.floor(Math.random()*10))
+      const pra=Math.min(100,base+Math.floor(Math.random()*10)-2)
+      const eco=Math.min(100,base+Math.floor(Math.random()*8)-3)
+      const pot=Math.min(100,base+Math.floor(Math.random()*12)+2)
+      const total=Math.round((inn+pra+eco+pot)/4+bonus)
+      document.getElementById("inn").textContent=inn
+      document.getElementById("pra").textContent=pra
+      document.getElementById("eco").textContent=eco
+      document.getElementById("pot").textContent=pot
+      document.getElementById("total").textContent=total
+      document.getElementById("tips").textContent=selTech.length===3?`第三张卡牌共鸣 +${bonus}分`:"稳定2卡配方"
+      document.getElementById("result").style.display="block"
+      if(total>best.score){
+        best.score=total
+        best.text=`${selScene} + ${selTech.join("、")} | ${total}分`
+        document.getElementById("bestText").textContent=best.text
+      }
+    }
+  </script>
+</body>
+</html>
